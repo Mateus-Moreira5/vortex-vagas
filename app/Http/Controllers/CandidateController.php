@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Filters\CandidateFilter;
 use App\Http\Controllers\Concerns\HandlesPagination;
 use App\Http\Controllers\Concerns\RedirectsToIndex;
+use App\Http\Requests\BulkDestroyRequest;
 use App\Http\Requests\CandidateRequest;
 use App\Models\Candidate;
 use App\Models\Vacancy;
@@ -79,5 +80,13 @@ class CandidateController extends Controller
 
         return $this->redirectToIndex('candidates.index')
             ->with('success', 'Candidato excluído com sucesso.');
+    }
+
+    public function bulkDestroy(BulkDestroyRequest $request): RedirectResponse
+    {
+        $count = Candidate::whereKey($request->validated('ids'))->delete();
+
+        return $this->redirectToIndex('candidates.index')
+            ->with('success', "{$count} candidato(s) excluído(s) com sucesso.");
     }
 }

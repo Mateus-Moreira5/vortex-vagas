@@ -62,11 +62,22 @@
         </div>
     </form>
 
+    <form method="POST" action="{{ route('vacancies.bulk-destroy') }}" id="bulk-delete-vacancies" data-bulk-form class="mb-2">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-sm btn-danger" data-bulk-submit disabled>
+            Excluir selecionados (<span data-bulk-count>0</span>)
+        </button>
+    </form>
+
     <div class="card">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
+                        <th style="width: 1%">
+                            <input type="checkbox" class="form-check-input" data-bulk-toggle="bulk-delete-vacancies" aria-label="Selecionar todos">
+                        </th>
                         <th>Título</th>
                         <th>Tipo</th>
                         <th>Localização</th>
@@ -79,6 +90,9 @@
                 <tbody>
                     @forelse ($vacancies as $vacancy)
                         <tr>
+                            <td>
+                                <input type="checkbox" class="form-check-input" name="ids[]" value="{{ $vacancy->id }}" form="bulk-delete-vacancies" aria-label="Selecionar">
+                            </td>
                             <td><a href="{{ route('vacancies.show', $vacancy) }}">{{ $vacancy->title }}</a></td>
                             <td>{{ $vacancy->type->label() }}</td>
                             <td>{{ $vacancy->location ?? '—' }}</td>
@@ -104,7 +118,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">Nenhuma vaga encontrada.</td>
+                            <td colspan="8" class="text-center text-muted py-4">Nenhuma vaga encontrada.</td>
                         </tr>
                     @endforelse
                 </tbody>

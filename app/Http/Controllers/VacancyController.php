@@ -6,6 +6,7 @@ use App\Enums\VacancyType;
 use App\Filters\VacancyFilter;
 use App\Http\Controllers\Concerns\HandlesPagination;
 use App\Http\Controllers\Concerns\RedirectsToIndex;
+use App\Http\Requests\BulkDestroyRequest;
 use App\Http\Requests\VacancyRequest;
 use App\Models\Vacancy;
 use Illuminate\Http\RedirectResponse;
@@ -81,6 +82,14 @@ class VacancyController extends Controller
 
         return $this->redirectToIndex('vacancies.index')
             ->with('success', 'Vaga excluída com sucesso.');
+    }
+
+    public function bulkDestroy(BulkDestroyRequest $request): RedirectResponse
+    {
+        $count = Vacancy::whereKey($request->validated('ids'))->delete();
+
+        return $this->redirectToIndex('vacancies.index')
+            ->with('success', "{$count} vaga(s) excluída(s) com sucesso.");
     }
 
     public function togglePause(Vacancy $vacancy): RedirectResponse

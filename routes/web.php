@@ -9,8 +9,10 @@ Route::redirect('/', '/vacancies');
 
 Route::patch('vacancies/{vacancy}/toggle-pause', [VacancyController::class, 'togglePause'])
     ->name('vacancies.toggle-pause');
+Route::delete('vacancies', [VacancyController::class, 'bulkDestroy'])->name('vacancies.bulk-destroy');
 Route::resource('vacancies', VacancyController::class);
 
+Route::delete('candidates', [CandidateController::class, 'bulkDestroy'])->name('candidates.bulk-destroy');
 Route::resource('candidates', CandidateController::class);
 
 Route::post('candidates/{candidate}/applications', [ApplicationController::class, 'store'])

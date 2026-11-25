@@ -73,8 +73,9 @@ O enunciado pede "testes unitários e de unidade". Interpretei como duas categor
 
 **Em todas as listagens**
 - Filtro por qualquer campo, combinável
-- Paginação com 20 itens por página
+- Paginação com 20 itens por página, ajustável para 10, 50 ou 100
 - Exclusão a partir da listagem, retornando à mesma página e filtros
+- Exclusão em massa: seleção por checkbox, com opção de selecionar todos da página
 - Validação de campos obrigatórios e tipos de dados, com mensagens em português
 
 ## Arquitetura e decisões
@@ -107,18 +108,20 @@ app/
 | GET/POST | `/vacancies/create`, `/vacancies` | Criação de vaga |
 | GET/PUT | `/vacancies/{id}/edit`, `/vacancies/{id}` | Edição de vaga |
 | DELETE | `/vacancies/{id}` | Exclusão de vaga |
+| DELETE | `/vacancies` | Exclusão em massa de vagas |
 | PATCH | `/vacancies/{id}/toggle-pause` | Pausar ou reativar vaga |
 | GET | `/candidates` | Listagem de candidatos com filtros |
 | GET/POST | `/candidates/create`, `/candidates` | Criação de candidato |
 | GET/PUT | `/candidates/{id}/edit`, `/candidates/{id}` | Edição de candidato |
 | DELETE | `/candidates/{id}` | Exclusão de candidato |
+| DELETE | `/candidates` | Exclusão em massa de candidatos |
 | POST | `/candidates/{id}/applications` | Inscrever candidato em vaga |
 | DELETE | `/candidates/{id}/applications/{vacancyId}` | Cancelar candidatura |
 
 ## Bônus
 
 - [x] Alterar a quantidade de itens por página (10, 20, 50 ou 100)
-- [ ] Exclusão em massa
+- [x] Exclusão em massa (`public/js/bulk-delete.js` controla a seleção)
 - [ ] Autenticação de usuário
 - [ ] API REST JSON
 
