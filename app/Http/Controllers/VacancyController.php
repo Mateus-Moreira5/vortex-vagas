@@ -5,16 +5,16 @@ namespace App\Http\Controllers;
 use App\Enums\VacancyType;
 use App\Filters\VacancyFilter;
 use App\Http\Controllers\Concerns\HandlesPagination;
+use App\Http\Controllers\Concerns\RedirectsToIndex;
 use App\Http\Requests\VacancyRequest;
 use App\Models\Vacancy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class VacancyController extends Controller
 {
-    use HandlesPagination;
+    use HandlesPagination, RedirectsToIndex;
 
     public function index(Request $request): View
     {
@@ -79,11 +79,7 @@ class VacancyController extends Controller
     {
         $vacancy->delete();
 
-        $previous = url()->previous();
-        $index = route('vacancies.index');
-
-        return redirect()
-            ->to(Str::before($previous, '?') === $index ? $previous : $index)
+        return $this->redirectToIndex('vacancies.index')
             ->with('success', 'Vaga excluída com sucesso.');
     }
 

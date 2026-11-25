@@ -14,6 +14,9 @@
                 <li class="nav-item">
                     <a class="nav-link @if(request()->routeIs('vacancies.*')) active @endif" href="{{ route('vacancies.index') }}">Vagas</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link @if(request()->routeIs('candidates.*')) active @endif" href="{{ route('candidates.index') }}">Candidatos</a>
+                </li>
             </ul>
         </div>
     </nav>
