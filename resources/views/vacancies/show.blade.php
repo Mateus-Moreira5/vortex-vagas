@@ -27,6 +27,10 @@
         </div>
     </div>
 
+    @if ($vacancy->is_paused)
+        <div class="alert alert-warning">Esta vaga está pausada e não recebe novas candidaturas.</div>
+    @endif
+
     <div class="card card-body mb-4">
         <h2 class="h5">Descrição</h2>
         <p class="mb-0" style="white-space: pre-line">{{ $vacancy->description }}</p>
@@ -36,9 +40,20 @@
         <div class="card-header">Candidatos inscritos ({{ $candidates->count() }})</div>
         <ul class="list-group list-group-flush">
             @forelse ($candidates as $candidate)
-                <li class="list-group-item d-flex justify-content-between">
-                    <span>{{ $candidate->name }} <span class="text-muted">· {{ $candidate->email }}</span></span>
-                    <small class="text-muted">{{ $candidate->pivot->created_at->format('d/m/Y H:i') }}</small>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        <a href="{{ route('candidates.show', $candidate) }}">{{ $candidate->name }}</a>
+                        <span class="text-muted">· {{ $candidate->email }}</span>
+                    </span>
+                    <span class="d-flex align-items-center gap-3">
+                        <small class="text-muted">{{ $candidate->pivot->created_at->format('d/m/Y H:i') }}</small>
+                        <form method="POST" action="{{ route('candidates.applications.destroy', [$candidate, $vacancy]) }}"
+                              onsubmit="return confirm('Remover a candidatura deste candidato?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Remover</button>
+                        </form>
+                    </span>
                 </li>
             @empty
                 <li class="list-group-item text-muted">Nenhum candidato inscrito.</li>

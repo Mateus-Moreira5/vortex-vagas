@@ -7,6 +7,7 @@ use App\Http\Controllers\Concerns\HandlesPagination;
 use App\Http\Controllers\Concerns\RedirectsToIndex;
 use App\Http\Requests\CandidateRequest;
 use App\Models\Candidate;
+use App\Models\Vacancy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -50,7 +51,12 @@ class CandidateController extends Controller
             ->orderByPivot('created_at', 'desc')
             ->get();
 
-        return view('candidates.show', compact('candidate', 'vacancies'));
+        $availableVacancies = Vacancy::open()
+            ->whereNotIn('id', $vacancies->modelKeys())
+            ->orderBy('title')
+            ->get();
+
+        return view('candidates.show', compact('candidate', 'vacancies', 'availableVacancies'));
     }
 
     public function edit(Candidate $candidate): View

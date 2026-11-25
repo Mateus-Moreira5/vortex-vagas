@@ -24,4 +24,9 @@ class Candidate extends Model
     {
         return $this->belongsToMany(Vacancy::class, 'applications')->withTimestamps();
     }
+
+    public function hasAppliedTo(Vacancy $vacancy): bool
+    {
+        return $this->vacancies()->whereKey($vacancy->getKey())->exists();
+    }
 }

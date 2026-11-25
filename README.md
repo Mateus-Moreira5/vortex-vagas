@@ -1,58 +1,134 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Vortex Vagas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicação web para gerenciamento de vagas de emprego e candidaturas, desenvolvida como teste técnico para a vaga de Desenvolvedor Back-End.
 
-## About Laravel
+Permite cadastrar vagas (CLT, Pessoa Jurídica ou Freelancer), cadastrar candidatos e inscrever candidatos em uma ou mais vagas. Vagas podem ser pausadas, o que impede novas candidaturas.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tecnologias
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.4 / Laravel 13
+- PostgreSQL 17
+- Blade + Bootstrap 5 (HTML, CSS e JavaScript)
+- PHPUnit
+- Docker (nginx + php-fpm + postgres)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Como executar
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Pré-requisitos: [Docker](https://docs.docker.com/get-docker/) com Docker Compose e Git. Não é necessário ter PHP, Composer ou PostgreSQL instalados na máquina.
 
 ```bash
-composer require laravel/boost --dev
+git clone https://github.com/Mateus-Moreira5/vortex-vagas.git
+cd vortex-vagas
 
-php artisan boost:install
+cp .env.example .env
+
+docker compose up -d --build
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+> No Windows (PowerShell), use `Copy-Item .env.example .env` no lugar do `cp`.
 
-## Contributing
+A aplicação fica disponível em **http://localhost:8000**.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+O seed cria 50 vagas (40 abertas e 10 pausadas) e 80 candidatos com candidaturas aleatórias.
 
-## Code of Conduct
+### Serviços
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Serviço | Container | Acesso |
+|---|---|---|
+| Aplicação (nginx) | `vortex-nginx` | http://localhost:8000 |
+| PHP-FPM | `vortex-app` | interno |
+| PostgreSQL | `vortex-db` | `localhost:5433` · banco `vortex` · usuário `vortex` · senha `secret` |
 
-## Security Vulnerabilities
+## Testes
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+docker compose exec app php artisan test
+```
 
-## License
+Os testes rodam em um banco PostgreSQL separado (`vortex_test`, criado automaticamente na primeira subida do container), sem afetar os dados de desenvolvimento.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+O enunciado pede "testes unitários e de unidade". Interpretei como duas categorias:
+
+- **Unitários** (`tests/Unit`): lógica isolada, sem HTTP e sem banco (enum de tipo de vaga, regras do model de vaga).
+- **Feature** (`tests/Feature`): fluxo completo de requisição (rota, validação, controller, banco e resposta) dos CRUDs, filtros, paginação e candidaturas, além dos testes da regra de negócio de candidatura no `ApplicationService`.
+
+## Funcionalidades
+
+**Vagas**
+- CRUD completo, com tipo CLT, Pessoa Jurídica ou Freelancer
+- Pausar e reativar: vaga pausada não recebe novas candidaturas (as existentes são mantidas)
+- Filtros por título, descrição, localização, tipo, status e faixa salarial
+
+**Candidatos**
+- CRUD completo, com e-mail único
+- Filtros por nome, e-mail, telefone e faixa de data de nascimento
+
+**Candidaturas**
+- Um candidato pode se inscrever em uma ou mais vagas, a partir da página do candidato
+- Bloqueio de inscrição em vaga pausada e de inscrição duplicada
+- Cancelamento da candidatura pela página do candidato ou da vaga
+
+**Em todas as listagens**
+- Filtro por qualquer campo, combinável
+- Paginação com 20 itens por página
+- Exclusão a partir da listagem, retornando à mesma página e filtros
+- Validação de campos obrigatórios e tipos de dados, com mensagens em português
+
+## Arquitetura e decisões
+
+```
+app/
+├── Enums/VacancyType.php            Tipos de vaga e seus rótulos
+├── Exceptions/ApplicationException  Erros de regra de negócio da candidatura
+├── Filters/                         Filtros de listagem (QueryFilter + um filtro por recurso)
+├── Http/
+│   ├── Controllers/                 Controllers finos, apenas coordenam
+│   │   └── Concerns/                Traits compartilhados (paginação, redirect pós-exclusão)
+│   └── Requests/                    Validação (Form Requests)
+├── Models/                          Models Eloquent
+│   └── Concerns/Filterable.php      Scope de filtro reutilizável
+└── Services/ApplicationService.php  Regras da candidatura
+```
+
+- **Filtros com Template Method:** `QueryFilter` define o algoritmo (percorrer os filtros permitidos e aplicar os que vieram preenchidos) e cada recurso só declara seus filtros (`VacancyFilter`, `CandidateFilter`). A lista de filtros é fechada, então parâmetros desconhecidos são ignorados, assim como valores inválidos.
+- **Validação em Form Requests:** os controllers recebem apenas dados válidos.
+- **Regra de negócio em Service:** a candidatura é a única operação com regra de negócio (vaga pausada e duplicidade). Ela fica no `ApplicationService`, que pode ser reaproveitado por outras interfaces e testado de forma isolada. Os CRUDs simples usam o Eloquent diretamente, sem camadas de repositório, que só repassariam chamadas.
+- **Integridade no banco:** índice único em `applications (candidate_id, vacancy_id)` e exclusão em cascata das candidaturas ao remover vaga ou candidato.
+- **Enum** para o tipo de vaga, com cast automático no model.
+
+## Rotas principais
+
+| Método | URI | Descrição |
+|---|---|---|
+| GET | `/vacancies` | Listagem de vagas com filtros |
+| GET/POST | `/vacancies/create`, `/vacancies` | Criação de vaga |
+| GET/PUT | `/vacancies/{id}/edit`, `/vacancies/{id}` | Edição de vaga |
+| DELETE | `/vacancies/{id}` | Exclusão de vaga |
+| PATCH | `/vacancies/{id}/toggle-pause` | Pausar ou reativar vaga |
+| GET | `/candidates` | Listagem de candidatos com filtros |
+| GET/POST | `/candidates/create`, `/candidates` | Criação de candidato |
+| GET/PUT | `/candidates/{id}/edit`, `/candidates/{id}` | Edição de candidato |
+| DELETE | `/candidates/{id}` | Exclusão de candidato |
+| POST | `/candidates/{id}/applications` | Inscrever candidato em vaga |
+| DELETE | `/candidates/{id}/applications/{vacancyId}` | Cancelar candidatura |
+
+## Bônus
+
+- [x] Alterar a quantidade de itens por página (10, 20, 50 ou 100)
+- [ ] Exclusão em massa
+- [ ] Autenticação de usuário
+- [ ] API REST JSON
+
+## Comandos úteis
+
+```bash
+docker compose exec app php artisan migrate:fresh --seed   # recria o banco com dados de exemplo
+docker compose exec app php artisan route:list             # lista as rotas
+docker compose exec app ./vendor/bin/pint                  # formata o código
+docker compose logs -f app                                 # logs do PHP
+docker compose down                                        # para os containers
+docker compose down -v                                     # para os containers e apaga o banco
+```
