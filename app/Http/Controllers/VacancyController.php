@@ -4,14 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Enums\VacancyType;
 use App\Filters\VacancyFilter;
+use App\Http\Controllers\Concerns\HandlesPagination;
 use App\Http\Requests\VacancyRequest;
 use App\Models\Vacancy;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class VacancyController extends Controller
 {
+    use HandlesPagination;
+
     public function index(Request $request): View
     {
         $vacancies = Vacancy::query()
@@ -75,8 +79,11 @@ class VacancyController extends Controller
     {
         $vacancy->delete();
 
+        $previous = url()->previous();
+        $index = route('vacancies.index');
+
         return redirect()
-            ->route('vacancies.index')
+            ->to(Str::before($previous, '?') === $index ? $previous : $index)
             ->with('success', 'Vaga excluída com sucesso.');
     }
 
